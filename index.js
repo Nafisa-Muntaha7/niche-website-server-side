@@ -18,12 +18,21 @@ async function run() {
         await client.connect();
         const database = client.db('albums_db');
         const albumCollection = database.collection('albums');
+        const homeAlbumCollection = database.collection('homealbums');
+
 
         app.get('/albums', async (req, res) => {
             const cursor = albumCollection.find({});
             const albums = await cursor.toArray();
             res.send(albums);
-        })
+        });
+
+        app.get('/homealbums', async (req, res) => {
+            const cursor = homeAlbumCollection.find({});
+            const homealbums = await cursor.toArray();
+            res.send(homealbums);
+        });
+
     }
     finally {
         //await client.close();
