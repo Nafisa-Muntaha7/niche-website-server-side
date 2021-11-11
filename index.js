@@ -19,6 +19,7 @@ async function run() {
         const database = client.db('albums_db');
         const albumCollection = database.collection('albums');
         const homeAlbumCollection = database.collection('homealbums');
+        const upcomingCollection = database.collection('upcomings');
 
 
         app.get('/albums', async (req, res) => {
@@ -31,6 +32,12 @@ async function run() {
             const cursor = homeAlbumCollection.find({});
             const homealbums = await cursor.toArray();
             res.send(homealbums);
+        });
+
+        app.get('/upcomings', async (req, res) => {
+            const cursor = upcomingCollection.find({});
+            const upcomings = await cursor.toArray();
+            res.send(upcomings);
         });
 
     }
