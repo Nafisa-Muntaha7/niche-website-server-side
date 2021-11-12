@@ -44,15 +44,24 @@ async function run() {
             res.send(upcomings);
         });
 
+        //Add Reviews
         app.post('/review', async (req, res) => {
             const result = await reviewCollection.insertOne(req.body)
             res.send(result);
         });
 
+        //Get all reviews
         app.get('/allReviews', async (req, res) => {
             const result = await reviewCollection.find({}).toArray();
             res.send(result);
             console.log(result);
+        });
+
+        //Get purchase product
+        app.get('/purchaseProduct/:id', async (req, res) => {
+            console.log(req.params.id)
+            const result = await albumCollection.find({ _id: ObjectId(req.params.id) }).toArray();
+            res.send(result[0]);
         })
 
     }
