@@ -23,6 +23,7 @@ async function run() {
         const upcomingCollection = database.collection('upcomings');
         const reviewCollection = database.collection('reviews');
         const usersCollection = database.collection('users');
+        const addProductsCollection = database.collection('addProducts');
 
 
         app.get('/albums', async (req, res) => {
@@ -43,19 +44,20 @@ async function run() {
             res.send(upcomings);
         });
 
-        //Add Reviews
+        //Add Reviews 
         app.post('/review', async (req, res) => {
             const result = await reviewCollection.insertOne(req.body)
             res.send(result);
         });
 
-        //Get all reviews
+        //Get all reviews added by users and show on the home page
         app.get('/allReviews', async (req, res) => {
             const result = await reviewCollection.find({}).toArray();
             res.send(result);
             console.log(result);
         });
 
+        //Check if the user is admin
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
@@ -75,6 +77,7 @@ async function run() {
             res.json(result);
         });
 
+        //Set users role to admin
         app.put('/users/admin', async (req, res) => {
             const user = req.body;
             console.log('put', user);
@@ -82,7 +85,20 @@ async function run() {
             const updateDoc = { $set: { role: 'admin' } };
             const result = await usersCollection.updateOne(filter, updateDoc);
             res.json(result);
-        })
+        });
+
+        //Add Products by Admin
+        app.post('/addProducts', async (req, res) => {
+            const result = await addProductsCollection.insertOne(req.body)
+            res.send(result);
+        });
+
+        //Get all products added by admin and show on the website
+        app.get('/allProducts', async (req, res) => {
+            const result = await addProductsCollection.find({}).toArray();
+            res.send(result);
+            console.log(result);
+        });
 
         //Get purchase product
         app.get('/purchaseProduct/:id', async (req, res) => {
