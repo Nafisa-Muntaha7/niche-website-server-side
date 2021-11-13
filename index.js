@@ -1,15 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const bodyParser = require('body-parser')
 const app = express();
 const { MongoClient } = require('mongodb');
-const ObjectId = require("mongodb").ObjectId;
+const ObjectId = require('mongodb').ObjectId;
 require('dotenv').config();
 const port = process.env.PORT || 7000;
 
 app.use(cors());
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5mrxq.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 
@@ -24,6 +22,7 @@ async function run() {
         const homeAlbumCollection = database.collection('homealbums');
         const upcomingCollection = database.collection('upcomings');
         const reviewCollection = database.collection('reviews');
+        const usersCollection = database.collection('users');
 
 
         app.get('/albums', async (req, res) => {
@@ -57,14 +56,41 @@ async function run() {
             console.log(result);
         });
 
-        //Get purchase product
-        app.get('/purchaseProduct/:id', async (req, res) => {
-            console.log(req.params.id)
-            const result = await albumCollection.find({ _id: ObjectId(req.params.id) }).toArray();
-            res.send(result[0]);
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const user = await usersCollection.findOne(query);
+            let isAdmin = false;
+            if (user?.role === 'admin') {
+                isAdmin = true;
+            }
+            res.json({ admin: isAdmin });
         })
 
+        //Add users to database
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollection.insertOne(user);
+            console.log(result);
+            res.json(result);
+        });
+
+        app.put('/users/admin', async (req, res) => {
+            const user = req.body;
+            console.log('put', user);
+            const filter = { email: user.email };
+            const updateDoc = { $set: { role: 'admin' } };
+            const result = await usersCollection.updateOne(filter, updateDoc);
+            res.json(result);
+        })
+
+        //Get purchase product
+        app.get('/purchaseProduct/:id', async (req, res) => {
+            const result = await albumCollection.find({ _id: ObjectId(req.params.id) }).toArray();
+            res.send(result[0]);
+        });
     }
+
     finally {
         //await client.close();
     }
